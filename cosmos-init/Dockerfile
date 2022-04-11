@@ -19,6 +19,8 @@ COPY ./plugins/packages/cosmosc2-tool-tlmgrapher/*.json packages/cosmosc2-tool-t
 COPY ./plugins/packages/cosmosc2-tool-tlmviewer/*.json packages/cosmosc2-tool-tlmviewer/
 COPY ./plugins/packages/cosmosc2-tool-common/ packages/cosmosc2-tool-common/
 COPY ./plugins/packages/cosmosc2-demo/*.json packages/cosmosc2-demo/
+# copy local packages
+COPY ./plugins/packages/local-packages/ packages/local-packages/
 
 # This is a fix for a network issue with registry.yarnpkg.com, possibly caused by the Ball firewall.
 # Might resolve itself and allow this line to be removed in the future...

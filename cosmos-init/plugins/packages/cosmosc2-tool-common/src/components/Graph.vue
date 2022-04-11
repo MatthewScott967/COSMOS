@@ -570,16 +570,38 @@ export default {
           spanGaps: true,
           stroke: this.colors.shift(),
         }
-        seriesObj.chartSeries.push({
-          ...commonProps,
-          item: item,
-          label: item.itemName,
-          value: (self, rawValue) =>
-            rawValue == null ? '--' : rawValue.toFixed(2),
-        })
-        seriesObj.overviewSeries.push({
-          ...commonProps,
-        })
+
+        if (item.plotType == 'EVENT_MARKER')
+        {
+          seriesObj.chartSeries.push({
+            ...commonProps,
+            paths: eventMarkers({showLabels: true, labelsAlign: "top"}),
+            item: item,
+            label: item.itemName,
+            auto: false,
+            width: 2,
+            value: (self, rawValue) =>
+              rawValue == null ? '--' : rawValue,
+          })
+          seriesObj.overviewSeries.push({
+            ...commonProps,
+            paths: eventMarkers({showLabels: false, labelsAlign: "top"}),
+            auto: false,
+          })
+        }
+        else
+        {
+          seriesObj.chartSeries.push({
+            ...commonProps,
+            item: item,
+            label: item.itemName,
+            value: (self, rawValue) =>
+              rawValue == null ? '--' : rawValue.toFixed(2),
+          })
+          seriesObj.overviewSeries.push({
+            ...commonProps,
+          })
+        }
         return seriesObj
       },
       { chartSeries: [], overviewSeries: [] }
@@ -989,21 +1011,56 @@ export default {
     addItems: function (itemArray, type = 'CONVERTED') {
       for (const item of itemArray) {
         item.valueType ||= type // set the default type
+        item.plotType ||= 'LINEAR'
+
         this.items.push(item)
         const index = this.data.length
         const color = this.colors.shift()
-        this.graph.addSeries(
-          {
-            spanGaps: true,
-            item: item,
-            label: item.itemName,
-            stroke: color,
-            value: (self, rawValue) =>
-              rawValue == null ? '--' : rawValue.toFixed(2),
-          },
-          index
-        )
-        this.overview.addSeries({spanGaps: true, stroke: color}, index)
+
+        if (item.plotType == 'EVENT_MARKER')
+        {
+          this.graph.addSeries(
+            {
+              paths: eventMarkers({showLabels: true, labelsAlign: "top"}),
+              spanGaps: true,
+              item: item,
+              label: item.itemName,
+              stroke: color,
+              auto: false,
+              width: 2,
+              value: (self, rawValue) =>
+                rawValue == null ? '--' : rawValue,
+            },
+            index
+          )
+
+          this.overview.addSeries(
+            {
+              paths: eventMarkers({showLabels: false, labelsAlign: "top"}),
+              auto: false,
+              spanGaps: true, 
+              stroke: color
+            }, 
+            index
+          )
+        }
+        else
+        {
+          this.graph.addSeries(
+            {
+              spanGaps: true,
+              item: item,
+              label: item.itemName,
+              stroke: color,
+              value: (self, rawValue) =>
+                rawValue == null ? '--' : rawValue.toFixed(2),
+            },
+            index
+          )
+  
+          this.overview.addSeries({spanGaps: true, stroke: color}, index)
+        }
+
         let newData = Array(this.data[0].length)
         this.data.splice(index, 0, newData)
         this.indexes[this.subscriptionKey(item)] = index
